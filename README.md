@@ -21,3 +21,5 @@ In my code, you can:
 1. Change modes, from Player vs Player to Computer vs Computer, and also Player vs Computer and Computer vs Player.
 2. Change computer evaluate & search depth, from 1 to 12.
 3. Play Sudoku Tic-Tac-Toe freely!
+
+To use the code in my directory, you can clone it, or just copy the code.
