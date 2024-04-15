@@ -1,5 +1,5 @@
 // Sudoku Tic-Tac-Toe Calculator & Simulator 3.5
-// Copyright by Regis Zhou ZJX
+// Copyright by RandomGuy1520
 
 /*
 Behold are the rules of Sudoku Tic-Tac-Toe. It is Sudoku since it uses a Sudoku board. It is also Tic-Tac-Toe since its score-counting is tic-tac-toe rules.
@@ -277,10 +277,10 @@ namespace SudokuTicTacToe
 	static inline void greet_player()
 	{
 		if (playing_mode == CVSC) return;
-		cout << "Welcome to Sudoku - Tic Tac Toe!\n欢迎来玩数独井字棋！\n\n"; Sleep(1000);
-		cout << "I think you have already understood the rules of this game.\n你应该已经懂得怎么玩这玩意儿了。\n\n"; Sleep(1000);
-		cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n输入坐标时，先输入竖着的，再输横着的。\n\n"; Sleep(1000);
-		cout << "The coordinates is as follows:\n坐标如下：\n\n";
+		cout << "Welcome to Sudoku - Tic Tac Toe!\n\n"; Sleep(1000);
+		cout << "I think you have already understood the rules of this game.\n\n"; Sleep(1000);
+		cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n\n"; Sleep(1000);
+		cout << "The coordinates is as follows:\n\n";
 		cout << "  1 2 3 4 5 6 7 8 9\n";
 		for (int i = 1; i <= 9; i++)
 		{
@@ -299,10 +299,10 @@ namespace SudokuTicTacToe
 		}
 		cout << endl;
 		Sleep(2000);
-		if (playing_mode == CVSP) cout << "Computer goes first and you go second.\n电脑先，你后。\n\n";
-		else if (playing_mode == PVSC) cout << "You go first and computer goes second.\n你先，电脑后。\n\n";
-		else if (playing_mode == PVSP) cout << "You're playing in two-player mode.\n现在是双人模式。\n\n";
-		cout << "Let's start!\n我们开始吧！\n\n"; Sleep(1000);
+		if (playing_mode == CVSP) cout << "Computer goes first and you go second.\n\n";
+		else if (playing_mode == PVSC) cout << "You go first and computer goes second.\n\n";
+		else if (playing_mode == PVSP) cout << "You're playing in two-player mode.\n\n";
+		cout << "Let's start!\n\n"; Sleep(1000);
 	}
 	class Moves
 	{
@@ -310,12 +310,12 @@ namespace SudokuTicTacToe
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			cout << "Your Move:\n\nEnter coordinates:\n输入坐标：\n";
+			cout << "Your Move:\n\nEnter coordinates:\n";
 			cin >> x >> y;
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
-				cout << "\nInvalid input! Try again:\n输入错误！请重新输入：\n";
+				cout << "\nInvalid input! Try again:\n";
 				cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
