@@ -1,3 +1,5 @@
+// This is the config file, where you can tweak around the parameters, constants, modes, and versions.
+
 #pragma once
 
 #define USING_NORMAL_BOARD
