@@ -1,7 +1,9 @@
+Copyright © by RandomGuy1520
+
 This is the code for:
 
 Sudoku Tic-Tac-Toe Calculator & Simulator 4.2 Version
-Copyright by RandomGuy1520
+In short: STTTCS 4.2 ver
 
 Game Rules:
 
@@ -31,4 +33,4 @@ In my code, you can:
 2. Change computer evaluation & search depth, from 1 to 12.
 3. Play Sudoku Tic-Tac-Toe freely!
 
-To use the code in my directory, you can clone it, or just copy the code.
+To use the code, you can clone it, or just copy the code.
