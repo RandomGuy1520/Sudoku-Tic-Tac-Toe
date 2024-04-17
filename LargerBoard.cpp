@@ -330,10 +330,10 @@ namespace SudokuTicTacToeWithLargerBoard
 	static inline void greet_player()
 	{
 		if (playing_mode == CVSC) return;
-		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "»¶Ó­À´ÍæÊý¶À¾®×ÖÆå£¡\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ÄãÓ¦¸ÃÒÑ¾­¶®µÃÔõÃ´ÍæÕâÍæÒâ¶ùÁË¡£\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "ÊäÈë×ø±êÊ±£¬ÏÈÊäÈëÊú×ÅµÄ£¬ÔÙÊäºá×ÅµÄ¡£\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "×ø±êÈçÏÂ£º\n"; std::cout << "\n";
+		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "æ¬¢è¿Žæ¥çŽ©æ•°ç‹¬äº•å­—æ£‹ï¼\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ä½ åº”è¯¥å·²ç»æ‡‚å¾—æ€Žä¹ˆçŽ©è¿™çŽ©æ„å„¿äº†ã€‚\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "è¾“å…¥åæ ‡æ—¶ï¼Œå…ˆè¾“å…¥ç«–ç€çš„ï¼Œå†è¾“æ¨ªç€çš„ã€‚\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "åæ ‡å¦‚ä¸‹ï¼š\n"; std::cout << "\n";
 		std::cout << "  ";
 		for (int i = 1; i <= MAXN; i++) std::cout << i << " ";
 		std::cout << std::endl;
@@ -354,10 +354,10 @@ namespace SudokuTicTacToeWithLargerBoard
 		}
 		std::cout << std::endl;
 		Sleep(2000);
-		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "µçÄÔÏÈ£¬Äãºó¡£\n"; std::cout << "\n"; }
-		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ÄãÏÈ£¬µçÄÔºó¡£\n"; std::cout << "\n"; }
-		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "ÏÖÔÚÊÇË«ÈËÄ£Ê½¡£\n"; std::cout << "\n"; }
-		std::cout << "Let's start!\n"; if (version == CHI) std::cout << "ÎÒÃÇ¿ªÊ¼°É£¡\n"; std::cout << "\n"; Sleep(1000);
+		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "ç”µè„‘å…ˆï¼Œä½ åŽã€‚\n"; std::cout << "\n"; }
+		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ä½ å…ˆï¼Œç”µè„‘åŽã€‚\n"; std::cout << "\n"; }
+		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "çŽ°åœ¨æ˜¯åŒäººæ¨¡å¼ã€‚\n"; std::cout << "\n"; }
+		std::cout << "Let's start!\n"; if (version == CHI) std::cout << "æˆ‘ä»¬å¼€å§‹å§ï¼\n"; std::cout << "\n"; Sleep(1000);
 	}
 	class Moves
 	{
@@ -365,12 +365,12 @@ namespace SudokuTicTacToeWithLargerBoard
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			std::cout << "Your Move:\n\nEnter coordinates:\nÊäÈë×ø±ê£º\n";
+			std::cout << "Your Move:\n\nEnter coordinates:\nè¾“å…¥åæ ‡ï¼š\n";
 			std::cin >> x >> y;
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
-				std::cout << "\nInvalid input! Try again:\nÊäÈë´íÎó£¡ÇëÖØÐÂÊäÈë£º\n";
+				std::cout << "\nInvalid input! Try again:\nè¾“å…¥é”™è¯¯ï¼è¯·é‡æ–°è¾“å…¥ï¼š\n";
 				std::cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
