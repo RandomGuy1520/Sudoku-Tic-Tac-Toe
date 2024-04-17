@@ -257,7 +257,6 @@ namespace SudokuTicTacToe
 			best_move = equals[0];
 			best_move = equals[rng() % (int)equals.size()];
 		}
-		if (depth == MAXDEPTH) std::cout << abcnt << std::endl;
 		return std::make_pair(best_move, best_diff);
 	}
 	static inline void dfs_grid(int grid)
