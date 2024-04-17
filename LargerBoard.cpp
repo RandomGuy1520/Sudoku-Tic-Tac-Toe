@@ -22,8 +22,7 @@ When the game ends, we count all tic-tac-toe scores (every K-in-a-row) in every 
 
 #include "config.h"
 
-#ifdef USING_NORMAL_BOARD
-
+#ifdef USING_LARGER_BOARD
 #pragma once
 #include <unordered_map>
 #include <windows.h>
@@ -31,18 +30,19 @@ When the game ends, we count all tic-tac-toe scores (every K-in-a-row) in every 
 #include <utility>
 #include <vector>
 #include <random>
+#include <thread>
 #include <string>
 #include <time.h>
 #include <tuple>
 
-int qwertim;
-static const std::vector<std::tuple<int, int, int>> tttlines = { {0, 1, 2}, {6, 7, 8}, {0, 3, 6}, {2, 5, 8}, {0, 4, 8}, {1, 4, 7}, {2, 4, 6}, {3, 4, 5} };
-static std::vector<std::pair<int, int>> tttlines_with_num[10];
+static std::vector<std::vector<int>> tttlines;
+static std::vector<std::vector<int>> tttlines_with_num[MAXN];
 static status memo[MAXN][MAXN];
+static double heur[MAXK + 1];
 static std::mt19937_64 rng(time(0) & 0x114514 | 0x1919810 ^ 5418);
-static int abcnt = 0;
+static int abcnt = 0, center = 0;
 
-namespace SudokuTicTacToe
+namespace SudokuTicTacToeWithLargerBoard
 {
 	struct point
 	{
@@ -83,7 +83,7 @@ namespace SudokuTicTacToe
 	static inline std::vector<int> get_grid_point_in_order(bool is_x, int grid_num)
 	{
 		std::vector<int> ans1, ans2, ord;
-		int mid = MAXN / 2; ord.push_back(mid);
+		int mid = center; ord.push_back(mid);
 		for (int i = 0; i < MAXN; i++) if (i != mid) ord.push_back(i);
 		status st = is_x ? X : O;
 		for (int i : ord)
@@ -91,7 +91,14 @@ namespace SudokuTicTacToe
 			bool marked = false;
 			for (auto& j : tttlines_with_num[i])
 			{
-				if (memo[grid_num][j.first] == st && memo[grid_num][j.second] == st)
+				bool t = true;
+				for (auto& k : j)
+					if (memo[grid_num][k] != st)
+					{
+						t = false;
+						break;
+					}
+				if (t)
 				{
 					ans1.push_back(i);
 					marked = true;
@@ -105,24 +112,31 @@ namespace SudokuTicTacToe
 	}
 	static inline void print_board()
 	{
-		std::cout << "\n  ";
-		for (int i = 1; i <= MAXN; i++) std::cout << i << " ";
+		printf("\n  ");
+		for (int i = 1; i <= MAXN; i++) printf("%d ", i % 10);
 		printf("\n");
 		for (int i = 0; i < MAXN; i++)
 		{
-			std::cout << i + 1 << " ";
+			printf("%d ", (i + 1) % 10);
 			for (int j = 0; j < MAXN; j++)
 			{
 				coord c(i, j); point p = c.to_point();
 				printf("%c", status_to_char(memo[p.grid][p.num]));
-				if (j % MAXK == MAXK - 1) printf("|");
+				if (j % MAXK == MAXK - 1)
+				{
+					printf("|");
+				}
 				else printf(" ");
 			}
 			printf("\n");
 			if (i % MAXK == MAXK - 1)
-				std::cout << "  - - - - - - - - -\n";
+			{
+				printf("  ");
+				for (int j = 0; j < MAXN; j++) printf("- ");
+				printf("\n");
+			}
 		}
-		std::cout << std::endl;
+		printf("\n");
 	}
 	static inline std::string get_board_fen()
 	{
@@ -142,20 +156,43 @@ namespace SudokuTicTacToe
 	}
 	static inline void init()
 	{
+		center = (MAXK % 2 == 1 ? MAXN / 2 : MAXN / 2 - MAXK / 2 - 1);
 		for (int i = 0; i < MAXN; i++)
 			for (int j = 0; j < MAXN; j++)
 				memo[i][j] = BLANK;
+		heur[MAXK] = 1.0;
+		for (int i = MAXK - 1; i > 0; i--)
+			heur[i] = heur[i + 1] / (MAXK - i + 1.1);
+		for (int i = 0; i < MAXK; i++)
+		{
+			std::vector<int> vec1, vec2;
+			for (int j = 0; j < MAXK; j++)
+			{
+				vec1.push_back(i + j * MAXK);
+				vec2.push_back(i * MAXK + j);
+			}
+			tttlines.push_back(vec1);
+			tttlines.push_back(vec2);
+		}
+		{
+			std::vector<int> vec1, vec2;
+			for (int i = 0; i < MAXK; i++) vec1.push_back(i * (MAXK + 1));
+			for (int i = 1; i <= MAXK; i++) vec2.push_back(i * (MAXK - 1));
+			tttlines.push_back(vec1); tttlines.push_back(vec2);
+		}
 		for (int i = 0; i < MAXN; i++)
-			for (auto& j : tttlines)
-				if (get<0>(j) == i || get<1>(j) == i || get<2>(j) == i)
-				{
-					if (get<0>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<1>(j), get<2>(j)));
-					if (get<1>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<0>(j), get<2>(j)));
-					if (get<2>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<0>(j), get<1>(j)));
-				}
+			for (auto j : tttlines)
+				for (int k : j)
+					if (k == i)
+					{
+						std::vector<int> vec;
+						for (int l : j) if (l != k) vec.push_back(l);
+						tttlines_with_num[i].push_back(vec);
+					}
 	}
 	static inline void __debuginit()
 	{
+		init();
 		std::string aa[MAXN] = {
 			"XXOXXXOOX",
 			"OXOO*OOX*",
@@ -184,12 +221,17 @@ namespace SudokuTicTacToe
 		{
 			for (auto& j : tttlines)
 			{
-				int a = memo[i][get<0>(j)], b = memo[i][get<1>(j)], c = memo[i][get<2>(j)];
-				int k = ((a == st) + (b == st) + (c == st));
-				if (a == BANNED || b == BANNED || c == BANNED || a == notst || b == notst || c == notst) k = 0;
-				if (k == 1) cnt += heur1;
-				else if (k == 2) cnt += heur2;
-				else if (k == 3) cnt += 1;
+				int tot = 0;
+				for (auto& k : j)
+				{
+					if (memo[i][k] == BANNED || memo[i][k] == notst)
+					{
+						tot = 0;
+						break;
+					}
+					tot += (memo[i][k] == st);
+				}
+				cnt += heur[tot];
 			}
 		}
 		return cnt;
@@ -205,7 +247,16 @@ namespace SudokuTicTacToe
 		for (int i = 0; i < MAXN; i++)
 		{
 			for (auto& j : tttlines)
-				cnt += (memo[i][get<0>(j)] == st && memo[i][get<1>(j)] == st && memo[i][get<2>(j)] == st);
+			{
+				bool t = true;
+				for (auto& k : j)
+					if (memo[i][k] != st)
+					{
+						t = false;
+						break;
+					}
+				cnt += t;
+			}
 		}
 		return cnt;
 	}
@@ -252,12 +303,11 @@ namespace SudokuTicTacToe
 			}
 		}
 		if (best_diff == uninit) return std::make_pair(-1, (double)get_point_diff());
-		if (count(equals.begin(), equals.end(), 4) > 0) best_move = 4;
+		if (count(equals.begin(), equals.end(), center) > 0) best_move = center;
 		else {
 			best_move = equals[0];
 			best_move = equals[rng() % (int)equals.size()];
 		}
-		if (depth == MAXDEPTH) std::cout << abcnt << std::endl;
 		return std::make_pair(best_move, best_diff);
 	}
 	static inline void dfs_grid(int grid)
@@ -273,7 +323,7 @@ namespace SudokuTicTacToe
 	static inline void game(std::pair<int, double>(*move_func)(bool, int))
 	{
 		int move_num = 0;
-		int now_grid = 4;
+		int now_grid = center;
 		bool is_x = true;
 		while (check_grid(now_grid))
 		{
@@ -295,12 +345,11 @@ namespace SudokuTicTacToe
 		else if (diff < 0) std::cout << "O Wins!!!!" << std::endl;
 		else std::cout << "What a TIE!!!!" << std::endl;
 		std::cout << "Game ended in " << move_num << " moves.\n";
-		qwertim = move_num;
 	}
 	static inline void print_result(int start_time)
 	{
 		printf("Finished calculating with depth %d, used %d ms time.\n", MAXDEPTH, clock() - start_time);
-		std::cout << "Total Calculation Size: " << abcnt << " " << std::fixed << abcnt / pow(9, MAXDEPTH) / qwertim << std::endl;
+		std::cout << "Total Calculation Size: " << abcnt << std::endl;
 	}
 	static inline void greet_player()
 	{
@@ -318,7 +367,7 @@ namespace SudokuTicTacToe
 			for (int j = 1; j <= MAXN; j++)
 			{
 				std::cout << "X";
-				if (j % (int)sqrt(MAXN) == 0) std::cout << "|";
+				if (j % MAXK == 0) std::cout << "|";
 				else std::cout << " ";
 			}
 			std::cout << std::endl;
@@ -387,8 +436,8 @@ namespace SudokuTicTacToe
 
 signed main()
 {
-	assert(MAXN == 9 && MAXK == 3, "Board Size Error");
-	using namespace SudokuTicTacToe;
+	assert(MAXK * MAXK == MAXN, "Board Size Error");
+	using namespace SudokuTicTacToeWithLargerBoard;
 	int start_time = clock();
 	greet_player();
 	init();
