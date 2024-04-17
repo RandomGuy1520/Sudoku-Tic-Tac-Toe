@@ -1,25 +1,3 @@
-// Sudoku Tic-Tac-Toe Calculator & Simulator 3.5
-// Copyright by Regis Zhou ZJX
-
-/*
-
-Rules:
-
-Behold are the rules of Sudoku Tic-Tac-Toe. It is Sudoku since it uses a Sudoku board. It is also Tic-Tac-Toe since its score-counting is tic-tac-toe rules.
-At first, there will be a N * N blank board, where usually N = 9. Let K be sqrt(N). The blank board consists of N (K * K) grids, and each grid consists of N squares.
-Player X and player O take turns placing 'X's and 'O's in one of the squares on the board. Player X goes first. The first move must be played in the center grid.
-If K is even, then the center grid will be the left-top one. After the first move, we look at the position of the square the last player played in the grid that includes it.
-Whatever position is the square in the larger grid, the move playing now must be in the grid with the same position as compared to the whole board.
-For example, if the m-th move is played in the center of the board, then the m+1 move must be played in N of the center grid.
-For another example, if the n-th move is played in the right-top corner square of any grid, then the n+1 move must be played in the right-top grid of the board.
-Banned squares: If a grid is full (every N of its squares is placed by X or O or is banned), then every square leading to this grid shall be banned.
-Banned squares cannot be placed by any player at any time later. For example, if the center square is full, then every center of other grids will be banned.
-When the game ends, we count all tic-tac-toe scores (every K-in-a-row) in every grid. Note that K-in-a-rows across grids do not count. The player with more scores wins.
-
-*/
-
-// Note: This program's time complexity is O(C * 9 ^ (D + 4)) in CVSC mode, where D is the search depth, and C is the alpha-beta pruning constant, which is around 1e-5 to 4e-5.
-
 #include "config.h"
 
 #ifdef USING_LARGER_BOARD
@@ -352,10 +330,10 @@ namespace SudokuTicTacToeWithLargerBoard
 	static inline void greet_player()
 	{
 		if (playing_mode == CVSC) return;
-		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "»¶Ó­À´ÍæÊý¶À¾®×ÖÆå£¡\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ÄãÓ¦¸ÃÒÑ¾­¶®µÃÔõÃ´ÍæÕâÍæÒâ¶ùÁË¡£\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "ÊäÈë×ø±êÊ±£¬ÏÈÊäÈëÊú×ÅµÄ£¬ÔÙÊäºá×ÅµÄ¡£\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "×ø±êÈçÏÂ£º\n"; std::cout << "\n";
+		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "æ¬¢è¿Žæ¥çŽ©æ•°ç‹¬äº•å­—æ£‹ï¼\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ä½ åº”è¯¥å·²ç»æ‡‚å¾—æ€Žä¹ˆçŽ©è¿™çŽ©æ„å„¿äº†ã€‚\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "è¾“å…¥åæ ‡æ—¶ï¼Œå…ˆè¾“å…¥ç«–ç€çš„ï¼Œå†è¾“æ¨ªç€çš„ã€‚\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "åæ ‡å¦‚ä¸‹ï¼š\n"; std::cout << "\n";
 		std::cout << "  ";
 		for (int i = 1; i <= MAXN; i++) std::cout << i << " ";
 		std::cout << std::endl;
@@ -376,10 +354,10 @@ namespace SudokuTicTacToeWithLargerBoard
 		}
 		std::cout << std::endl;
 		Sleep(2000);
-		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "µçÄÔÏÈ£¬Äãºó¡£\n"; std::cout << "\n"; }
-		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ÄãÏÈ£¬µçÄÔºó¡£\n"; std::cout << "\n"; }
-		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "ÏÖÔÚÊÇË«ÈËÄ£Ê½¡£\n"; std::cout << "\n"; }
-		std::cout << "Let's start!\n"; if (version == CHI) std::cout << "ÎÒÃÇ¿ªÊ¼°É£¡\n"; std::cout << "\n"; Sleep(1000);
+		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "ç”µè„‘å…ˆï¼Œä½ åŽã€‚\n"; std::cout << "\n"; }
+		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ä½ å…ˆï¼Œç”µè„‘åŽã€‚\n"; std::cout << "\n"; }
+		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "çŽ°åœ¨æ˜¯åŒäººæ¨¡å¼ã€‚\n"; std::cout << "\n"; }
+		std::cout << "Let's start!\n"; if (version == CHI) std::cout << "æˆ‘ä»¬å¼€å§‹å§ï¼\n"; std::cout << "\n"; Sleep(1000);
 	}
 	class Moves
 	{
@@ -387,12 +365,12 @@ namespace SudokuTicTacToeWithLargerBoard
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			std::cout << "Your Move:\n\nEnter coordinates:\nÊäÈë×ø±ê£º\n";
+			std::cout << "Your Move:\n\nEnter coordinates:\nè¾“å…¥åæ ‡ï¼š\n";
 			std::cin >> x >> y;
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
-				std::cout << "\nInvalid input! Try again:\nÊäÈë´íÎó£¡ÇëÖØÐÂÊäÈë£º\n";
+				std::cout << "\nInvalid input! Try again:\nè¾“å…¥é”™è¯¯ï¼è¯·é‡æ–°è¾“å…¥ï¼š\n";
 				std::cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
