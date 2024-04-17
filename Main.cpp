@@ -35,7 +35,6 @@ When the game ends, we count all tic-tac-toe scores (every K-in-a-row) in every 
 #include <time.h>
 #include <tuple>
 
-int qwertim;
 static const std::vector<std::tuple<int, int, int>> tttlines = { {0, 1, 2}, {6, 7, 8}, {0, 3, 6}, {2, 5, 8}, {0, 4, 8}, {1, 4, 7}, {2, 4, 6}, {3, 4, 5} };
 static std::vector<std::pair<int, int>> tttlines_with_num[10];
 static status memo[MAXN][MAXN];
@@ -294,12 +293,11 @@ namespace SudokuTicTacToe
 		else if (diff < 0) std::cout << "O Wins!!!!" << std::endl;
 		else std::cout << "What a TIE!!!!" << std::endl;
 		std::cout << "Game ended in " << move_num << " moves.\n";
-		qwertim = move_num;
 	}
 	static inline void print_result(int start_time)
 	{
 		printf("Finished calculating with depth %d, used %d ms time.\n", MAXDEPTH, clock() - start_time);
-		std::cout << "Total Calculation Size: " << abcnt << " " << std::fixed << abcnt / pow(9, MAXDEPTH) / qwertim << std::endl;
+		std::cout << "Total Calculation Size: " << abcnt << " " << std::endl;
 	}
 	static inline void greet_player()
 	{

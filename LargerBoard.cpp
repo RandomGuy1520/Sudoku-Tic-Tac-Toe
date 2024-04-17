@@ -30,10 +30,8 @@ When the game ends, we count all tic-tac-toe scores (every K-in-a-row) in every 
 #include <utility>
 #include <vector>
 #include <random>
-#include <thread>
 #include <string>
 #include <time.h>
-#include <tuple>
 
 static std::vector<std::vector<int>> tttlines;
 static std::vector<std::vector<int>> tttlines_with_num[MAXN];
