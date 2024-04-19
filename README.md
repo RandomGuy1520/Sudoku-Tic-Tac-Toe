@@ -26,7 +26,7 @@ The only difference between these two games is that when counting scores, Ultima
 
 Note:
 
-This program's time complexity is O(C * 9 ^ (D + 4)) in CVSC mode, where D is the search depth, and C is the alpha-beta pruning constant, which is around 1e-5 to 4e-5.
+This program's time complexity is O(C * N ^ (D + 4)) in CVSC mode, where D is the search depth, and C is the alpha-beta pruning constant, which is around 1e-5 to 4e-5.
 
 In my code, you can:
 
