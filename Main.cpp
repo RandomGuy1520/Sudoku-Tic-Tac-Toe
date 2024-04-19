@@ -277,6 +277,23 @@ namespace SudokuTicTacToe
 		printf("Finished calculating with depth %d, used %d ms time.\n", MAXDEPTH, clock() - start_time);
 		std::cout << "Total Calculation Size: " << abcnt << " " << std::endl;
 	}
+	static inline void get_playing_mode()
+	{
+		std::string input;
+		std::cout << "Which mode do you want to play in? Type CVSC, CVSP, PVSC, or PVSP below.\n";
+		if (version == CHI) std::cout << "你想要玩什么模式？请输入 CVSC, CVSP, PVSC, 或者 PVSP。P代表人，C代表机。\n";
+		std::cin >> input;
+		while (input != "CVSC" && input != "CVSP" && input != "PVSC" && input != "PVSP")
+		{
+			std::cout << "Input error! Please input CVSC, CVSP, PVSC, or PVSP again below.\n";
+			if (version == CHI) std::cout << "输入错误！请再次输入 CVSC, CVSP, PVSC, 或者 PVSP。\n";
+			std::cin >> input;
+		}
+		if (input == "CVSC") playing_mode = CVSC;
+		else if (input == "CVSP") playing_mode = CVSP;
+		else if (input == "PVSC") playing_mode = PVSC;
+		else if (input == "PVSP") playing_mode = PVSP;
+	}
 	static inline void greet_player()
 	{
 		if (playing_mode == CVSC) return;
@@ -365,6 +382,7 @@ signed main()
 	assert(MAXN == 9 && MAXK == 3, "Board Size Error");
 	using namespace SudokuTicTacToe;
 	int start_time = clock();
+	get_playing_mode();
 	greet_player();
 	init();
 	game(Moves::auto_move);
