@@ -1,6 +1,5 @@
-#include "config.h"
+// This is the includes.h file that includes everything basic.
 
-#ifdef USING_LARGER_BOARD
 #pragma once
 #include <unordered_map>
 #include <windows.h>
@@ -10,16 +9,31 @@
 #include <random>
 #include <string>
 #include <time.h>
+#include <tuple>
 
+#include "config.h"
+
+#define assert(x, y) if (!(x)) { throw(y); }
+
+static status memo[MAXN][MAXN];
+static std::mt19937_64 rng(time(0) & 0x114514 | 0x1919810 ^ 5418);
+static int abcnt = 0;
+
+#ifdef USING_NORMAL_BOARD
+static const std::vector<std::tuple<int, int, int>> tttlines = { {0, 1, 2}, {6, 7, 8}, {0, 3, 6}, {2, 5, 8}, {0, 4, 8}, {1, 4, 7}, {2, 4, 6}, {3, 4, 5} };
+static std::vector<std::pair<int, int>> tttlines_with_num[10];
+#endif
+
+#ifdef USING_LARGER_BOARD
 static std::vector<std::vector<int>> tttlines;
 static std::vector<std::vector<int>> tttlines_with_num[MAXN];
-static status memo[MAXN][MAXN];
 static double heur[MAXK + 1];
-static std::mt19937_64 rng(time(0) & 0x114514 | 0x1919810 ^ 5418);
-static int abcnt = 0, center = 0;
+#endif
 
-namespace SudokuTicTacToeWithLargerBoard
+class SudokuTicTacToe
 {
+public:
+	static const int center = (MAXK % 2 == 1 ? MAXN / 2 : MAXN / 2 - MAXK / 2 - 1);
 	struct point
 	{
 		int grid, num;
@@ -38,8 +52,13 @@ namespace SudokuTicTacToeWithLargerBoard
 		int x, y;
 		coord(int x, int y) : x(x), y(y) {}
 		coord() : x(-1), y(-1) {}
-		point to_point() const { int m_x = x / MAXK, m_y = y / MAXK, g_x = x % MAXK, g_y = y % MAXK; return point(MAXK * m_x + m_y, MAXK * g_x + g_y); }
 		void print() const { std::cout << x + 1 << " " << y + 1 << std::endl; }
+#ifdef USING_NORMAL_BOARD
+		point to_point() { int m_x = x / MAXK, m_y = y / MAXK, g_x = x % MAXK, g_y = y % MAXK; return point(MAXK * m_x + m_y, MAXK * g_x + g_y); }
+#endif
+#ifdef USING_LARGER_BOARD
+		point to_point() const { int m_x = x / MAXK, m_y = y / MAXK, g_x = x % MAXK, g_y = y % MAXK; return point(MAXK * m_x + m_y, MAXK * g_x + g_y); }
+#endif
 	};
 	static inline char status_to_char(status st)
 	{
@@ -55,64 +74,6 @@ namespace SudokuTicTacToeWithLargerBoard
 			if (memo[grid][i] == BLANK) return true;
 		}
 		return false;
-	}
-	static inline std::vector<int> get_grid_point_in_order(bool is_x, int grid_num)
-	{
-		std::vector<int> ans1, ans2, ord;
-		int mid = center; ord.push_back(mid);
-		for (int i = 0; i < MAXN; i++) if (i != mid) ord.push_back(i);
-		status st = is_x ? X : O;
-		for (int i : ord)
-		{
-			bool marked = false;
-			for (auto& j : tttlines_with_num[i])
-			{
-				bool t = true;
-				for (auto& k : j)
-					if (memo[grid_num][k] != st)
-					{
-						t = false;
-						break;
-					}
-				if (t)
-				{
-					ans1.push_back(i);
-					marked = true;
-					break;
-				}
-			}
-			if (!marked) ans2.push_back(i);
-		}
-		for (int i : ans2) ans1.push_back(i);
-		return ans1;
-	}
-	static inline void print_board()
-	{
-		printf("\n  ");
-		for (int i = 1; i <= MAXN; i++) printf("%d ", i % 10);
-		printf("\n");
-		for (int i = 0; i < MAXN; i++)
-		{
-			printf("%d ", (i + 1) % 10);
-			for (int j = 0; j < MAXN; j++)
-			{
-				coord c(i, j); point p = c.to_point();
-				printf("%c", status_to_char(memo[p.grid][p.num]));
-				if (j % MAXK == MAXK - 1)
-				{
-					printf("|");
-				}
-				else printf(" ");
-			}
-			printf("\n");
-			if (i % MAXK == MAXK - 1)
-			{
-				printf("  ");
-				for (int j = 0; j < MAXN; j++) printf("- ");
-				printf("\n");
-			}
-		}
-		printf("\n");
 	}
 	static inline std::string get_board_fen()
 	{
@@ -130,12 +91,129 @@ namespace SudokuTicTacToeWithLargerBoard
 	{
 		return std::hash<std::string>{}(get_board_fen());
 	}
+	static inline std::vector<int> get_grid_point_in_order(bool is_x, int grid_num)
+	{
+		std::vector<int> ans1, ans2, ord;
+		int mid = center; ord.push_back(mid);
+		for (int i = 0; i < MAXN; i++) if (i != mid) ord.push_back(i);
+		status st = is_x ? X : O;
+		for (int i : ord)
+		{
+			bool marked = false;
+			for (auto& j : tttlines_with_num[i])
+			{
+#ifdef USING_NORMAL_BOARD
+				if (memo[grid_num][j.first] == st && memo[grid_num][j.second] == st)
+				{
+					ans1.push_back(i);
+					marked = true;
+					break;
+				}
+#endif
+
+#ifdef USING_LARGER_BOARD
+				bool t = true;
+				for (auto& k : j)
+					if (memo[grid_num][k] != st)
+					{
+						t = false;
+						break;
+					}
+				if (t)
+				{
+					ans1.push_back(i);
+					marked = true;
+					break;
+				}
+#endif
+			}
+			if (!marked) ans2.push_back(i);
+		}
+		for (int i : ans2) ans1.push_back(i);
+		return ans1;
+	}
+	static inline double heuristic_count_point(bool is_x)
+	{
+		double cnt = 0;
+		status st = is_x ? X : O, notst = is_x ? O : X;
+		for (int i = 0; i < MAXN; i++)
+		{
+			for (auto& j : tttlines)
+			{
+#ifdef USING_NORMAL_BOARD
+				int a = memo[i][get<0>(j)], b = memo[i][get<1>(j)], c = memo[i][get<2>(j)];
+				int k = ((a == st) + (b == st) + (c == st));
+				if (a == BANNED || b == BANNED || c == BANNED || a == notst || b == notst || c == notst) k = 0;
+				if (k == 1) cnt += heur1;
+				else if (k == 2) cnt += heur2;
+				else if (k == 3) cnt += 1;
+#endif
+#ifdef USING_LARGER_BOARD
+				int tot = 0;
+				for (auto& k : j)
+				{
+					if (memo[i][k] == BANNED || memo[i][k] == notst)
+					{
+						tot = 0;
+						break;
+					}
+					tot += (memo[i][k] == st);
+				}
+				cnt += heur[tot];
+#endif
+			}
+		}
+		return cnt;
+	}
+	static inline double get_heuristic_point_diff()
+	{
+		return heuristic_count_point(true) - heuristic_count_point(false);
+	}
+	static inline int count_point(bool is_x)
+	{
+		int cnt = 0;
+		status st = is_x ? X : O;
+		for (int i = 0; i < MAXN; i++)
+		{
+			for (auto& j : tttlines)
+#ifdef USING_NORMAL_BOARD
+				cnt += (memo[i][get<0>(j)] == st && memo[i][get<1>(j)] == st && memo[i][get<2>(j)] == st);
+#endif
+#ifdef USING_LARGER_BOARD
+			{
+				bool t = true;
+				for (auto& k : j)
+					if (memo[i][k] != st)
+					{
+						t = false;
+						break;
+					}
+				cnt += t;
+			}
+#endif
+		}
+		return cnt;
+	}
+	static inline int get_point_diff()
+	{
+		return count_point(true) - count_point(false);
+	}
 	static inline void init()
 	{
-		center = (MAXK % 2 == 1 ? MAXN / 2 : MAXN / 2 - MAXK / 2 - 1);
 		for (int i = 0; i < MAXN; i++)
 			for (int j = 0; j < MAXN; j++)
 				memo[i][j] = BLANK;
+#ifdef USING_NORMAL_BOARD
+		for (int i = 0; i < MAXN; i++)
+			for (auto& j : tttlines)
+				if (get<0>(j) == i || get<1>(j) == i || get<2>(j) == i)
+				{
+					if (get<0>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<1>(j), get<2>(j)));
+					if (get<1>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<0>(j), get<2>(j)));
+					if (get<2>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<0>(j), get<1>(j)));
+				}
+#endif
+#ifdef USING_LARGER_BOARD
 		heur[MAXK] = 1.0;
 		for (int i = MAXK - 1; i > 0; i--)
 			heur[i] = heur[i + 1] / (MAXK - i + 1.1);
@@ -165,10 +243,35 @@ namespace SudokuTicTacToeWithLargerBoard
 						for (int l : j) if (l != k) vec.push_back(l);
 						tttlines_with_num[i].push_back(vec);
 					}
+#endif
+	}
+	static inline void print_board()
+	{
+		printf("\n  ");
+		for (int i = 1; i <= MAXN; i++) printf("%d ", i % 10);
+		printf("\n");
+		for (int i = 0; i < MAXN; i++)
+		{
+			printf("%d ", (i + 1) % 10);
+			for (int j = 0; j < MAXN; j++)
+			{
+				coord c(i, j); point p = c.to_point();
+				printf("%c", status_to_char(memo[p.grid][p.num]));
+				if (j % MAXK == MAXK - 1) printf("|");
+				else printf(" ");
+			}
+			printf("\n");
+			if (i % MAXK == MAXK - 1)
+			{
+				printf("  ");
+				for (int j = 0; j < MAXN; j++) printf("- ");
+				printf("\n");
+			}
+		}
+		printf("\n");
 	}
 	static inline void __debuginit()
 	{
-		init();
 		std::string aa[MAXN] = {
 			"XXOXXXOOX",
 			"OXOO*OOX*",
@@ -188,57 +291,6 @@ namespace SudokuTicTacToeWithLargerBoard
 			if (aa[i][j] == ' ') memo[x][y] = BLANK;
 		}
 		print_board();
-	}
-	static inline double heuristic_count_point(bool is_x)
-	{
-		double cnt = 0;
-		status st = is_x ? X : O, notst = is_x ? O : X;
-		for (int i = 0; i < MAXN; i++)
-		{
-			for (auto& j : tttlines)
-			{
-				int tot = 0;
-				for (auto& k : j)
-				{
-					if (memo[i][k] == BANNED || memo[i][k] == notst)
-					{
-						tot = 0;
-						break;
-					}
-					tot += (memo[i][k] == st);
-				}
-				cnt += heur[tot];
-			}
-		}
-		return cnt;
-	}
-	static inline double get_heuristic_point_diff()
-	{
-		return heuristic_count_point(true) - heuristic_count_point(false);
-	}
-	static inline int count_point(bool is_x)
-	{
-		int cnt = 0;
-		status st = is_x ? X : O;
-		for (int i = 0; i < MAXN; i++)
-		{
-			for (auto& j : tttlines)
-			{
-				bool t = true;
-				for (auto& k : j)
-					if (memo[i][k] != st)
-					{
-						t = false;
-						break;
-					}
-				cnt += t;
-			}
-		}
-		return cnt;
-	}
-	static inline int get_point_diff()
-	{
-		return count_point(true) - count_point(false);
 	}
 	static inline std::pair<int, double> abdfs(int depth, bool is_x, int grid, double alpha = -1e9, double beta = 1e9)
 	{
@@ -286,16 +338,6 @@ namespace SudokuTicTacToeWithLargerBoard
 		}
 		return std::make_pair(best_move, best_diff);
 	}
-	static inline void dfs_grid(int grid)
-	{
-		for (int i = 0; i < MAXN; i++)
-			if (i != grid && memo[i][grid] == BLANK)
-			{
-				memo[i][grid] = BANNED;
-				if (!check_grid(i))
-					dfs_grid(i);
-			}
-	}
 	static inline void game(std::pair<int, double>(*move_func)(bool, int))
 	{
 		int move_num = 0;
@@ -322,42 +364,81 @@ namespace SudokuTicTacToeWithLargerBoard
 		else std::cout << "What a TIE!!!!" << std::endl;
 		std::cout << "Game ended in " << move_num << " moves.\n";
 	}
+	static inline void dfs_grid(int grid)
+	{
+		for (int i = 0; i < MAXN; i++)
+			if (i != grid && memo[i][grid] == BLANK)
+			{
+				memo[i][grid] = BANNED;
+				if (!check_grid(i))
+					dfs_grid(i);
+			}
+	}
 	static inline void print_result(int start_time)
 	{
 		printf("Finished calculating with depth %d, used %d ms time.\n", MAXDEPTH, clock() - start_time);
-		std::cout << "Total Calculation Size: " << abcnt << std::endl;
+		std::cout << "Total Calculation Size: " << abcnt << " " << std::endl;
+	}
+	static inline void get_playing_mode()
+	{
+		if (playing_mode != GET_FROM_USER_INPUT) return;
+		std::string input;
+		std::cout << "Which mode do you want to play in? Type CVSC, CVSP, PVSC, or PVSP below.\n";
+		if (version == CHI) std::cout << "你想要玩什么模式？请输入 CVSC, CVSP, PVSC, 或者 PVSP。P代表人，C代表机。\n";
+		std::cin >> input;
+		while (input != "CVSC" && input != "CVSP" && input != "PVSC" && input != "PVSP")
+		{
+			std::cout << "Input error! Please input CVSC, CVSP, PVSC, or PVSP again below.\n";
+			if (version == CHI) std::cout << "输入错误！请再次输入 CVSC, CVSP, PVSC, 或者 PVSP。\n";
+			std::cin >> input;
+		}
+		if (input == "CVSC") playing_mode = CVSC;
+		else if (input == "CVSP") playing_mode = CVSP;
+		else if (input == "PVSC") playing_mode = PVSC;
+		else if (input == "PVSP") playing_mode = PVSP;
 	}
 	static inline void greet_player()
 	{
-		if (playing_mode == CVSC) return;
-		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "娆㈣繋鏉ョ帺鏁扮嫭浜曞瓧妫嬶紒\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "浣犲簲璇ュ凡缁忔噦寰楁�庝箞鐜╄繖鐜╂剰鍎夸簡銆俓n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "杈撳叆鍧愭爣鏃讹紝鍏堣緭鍏ョ珫鐫�鐨勶紝鍐嶈緭妯潃鐨勩�俓n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "鍧愭爣濡備笅锛歕n"; std::cout << "\n";
+		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "欢迎来玩数独井字棋！\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "你应该已经懂得怎么玩这玩意儿了。\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "输入坐标时，先输入竖着的，再输横着的。\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "坐标如下：\n"; std::cout << "\n";
 		std::cout << "  ";
-		for (int i = 1; i <= MAXN; i++) std::cout << i << " ";
+		for (int i = 1; i <= MAXN; i++) std::cout << i % 10 << " ";
 		std::cout << std::endl;
 		for (int i = 1; i <= MAXN; i++)
 		{
-			std::cout << i << " ";
+			std::cout << i % 10 << " ";
 			for (int j = 1; j <= MAXN; j++)
 			{
 				std::cout << "X";
-				if (j % MAXK == 0) std::cout << "|";
+				if (j % (int)sqrt(MAXN) == 0) std::cout << "|";
 				else std::cout << " ";
 			}
 			std::cout << std::endl;
 			if (i % MAXK == 0)
 			{
-				std::cout << "  - - - - - - - - -\n";
+				std::cout << " ";
+				for (int j = 1; j <= MAXN; j++)
+					std::cout << " -";
+				std::cout << '\n';
 			}
 		}
-		std::cout << std::endl;
 		Sleep(2000);
-		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "鐢佃剳鍏堬紝浣犲悗銆俓n"; std::cout << "\n"; }
-		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "浣犲厛锛岀數鑴戝悗銆俓n"; std::cout << "\n"; }
-		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "鐜板湪鏄弻浜烘ā寮忋�俓n"; std::cout << "\n"; }
-		std::cout << "Let's start!\n"; if (version == CHI) std::cout << "鎴戜滑寮�濮嬪惂锛乗n"; std::cout << "\n"; Sleep(1000);
+		std::cout << std::endl;
+#ifdef USING_LARGER_BOARD
+		std::cout << "The coordinates appearing on the screen have been modded by 10. But when you type them, please type the original coordinates.\n";
+		if (version == CHI) std::cout << "显示的坐标都被做了模10运算，但当你输入坐标时，请输入原来的坐标。\n";
+		std::cout << std::endl;
+#endif
+		Sleep(1000);
+		get_playing_mode();
+		std::cout << std::endl;
+		if (playing_mode == CVSC) { std::cout << "You're playing in computer mode.\n"; if (version == CHI) std::cout << "现在是电脑对战模式。\n"; }
+		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "电脑先，你后。\n"; }
+		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "你先，电脑后。\n"; }
+		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "现在是双人模式。\n"; }
+		std::cout << "\nLet's start!\n"; if (version == CHI) std::cout << "我们开始吧！\n"; std::cout << "\n"; Sleep(1000);
 	}
 	class Moves
 	{
@@ -365,12 +446,12 @@ namespace SudokuTicTacToeWithLargerBoard
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			std::cout << "Your Move:\n\nEnter coordinates:\n杈撳叆鍧愭爣锛歕n";
+			std::cout << "Your Move:\n\nEnter coordinates:\n输入坐标：\n";
 			std::cin >> x >> y;
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
-				std::cout << "\nInvalid input! Try again:\n杈撳叆閿欒锛佽閲嶆柊杈撳叆锛歕n";
+				std::cout << "\nInvalid input! Try again:\n输入错误！请重新输入：\n";
 				std::cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
@@ -409,16 +490,3 @@ namespace SudokuTicTacToeWithLargerBoard
 		}
 	};
 };
-
-signed main()
-{
-	assert(MAXK * MAXK == MAXN, "Board Size Error");
-	using namespace SudokuTicTacToeWithLargerBoard;
-	int start_time = clock();
-	greet_player();
-	init();
-	game(Moves::auto_move);
-	print_result(start_time);
-}
-
-#endif
