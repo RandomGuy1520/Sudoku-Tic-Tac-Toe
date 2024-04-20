@@ -435,7 +435,7 @@ public:
 		get_playing_mode();
 		std::cout << std::endl;
 		if (playing_mode == CVSC) { std::cout << "You're playing in computer mode.\n"; if (version == CHI) std::cout << "现在是电脑对战模式。\n"; }
-		if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "电脑先，你后。\n"; }
+		else if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "电脑先，你后。\n"; }
 		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "你先，电脑后。\n"; }
 		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "现在是双人模式。\n"; }
 		std::cout << "\nLet's start!\n"; if (version == CHI) std::cout << "我们开始吧！\n"; std::cout << "\n"; Sleep(1000);
