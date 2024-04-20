@@ -1,6 +1,7 @@
 // This is the includes.h file that includes everything basic.
 
 #pragma once
+#define NOMINMAX
 #include <unordered_map>
 #include <windows.h>
 #include <iostream>
@@ -313,7 +314,7 @@ public:
 					best_diff = diff;
 					if (best_diff > beta)
 						return std::make_pair(i, best_diff);
-					alpha = max(alpha, best_diff);
+					alpha = std::max(alpha, best_diff);
 				}
 				equals.push_back(i);
 			}
@@ -325,7 +326,7 @@ public:
 					best_diff = diff;
 					if (best_diff < alpha)
 						return std::make_pair(i, best_diff);
-					beta = min(beta, best_diff);
+					beta = std::min(beta, best_diff);
 				}
 				equals.push_back(i);
 			}
@@ -446,12 +447,13 @@ public:
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			std::cout << "Your Move:\n\nEnter coordinates:\n输入坐标：\n";
+			std::cout << "Your Move:\n\nEnter coordinates:\n"; if (version == CHI) std::cout << "输入坐标：\n";
 			std::cin >> x >> y;
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
-				std::cout << "\nInvalid input! Try again:\n输入错误！请重新输入：\n";
+				if (std::cin.fail()) std::cin.clear(), std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cout << "\nInvalid input! Try again:\n"; if (version == CHI) std::cout << "输入错误！请重新输入：\n";
 				std::cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
