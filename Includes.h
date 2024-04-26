@@ -246,7 +246,7 @@ public:
 					}
 #endif
 	}
-	static inline void print_board()
+	static inline void print_board(point last_move = point(-1, -1))
 	{
 		printf("\n  ");
 		for (int i = 1; i <= MAXN; i++) printf("%d ", i % 10);
@@ -257,7 +257,13 @@ public:
 			for (int j = 0; j < MAXN; j++)
 			{
 				coord c(i, j); point p = c.to_point();
-				printf("%c", status_to_char(memo[p.grid][p.num]));
+				if (last_move.grid == p.grid && last_move.num == p.num)
+				{
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
+					printf("%c", status_to_char(memo[p.grid][p.num]));
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+				}
+				else printf("%c", status_to_char(memo[p.grid][p.num]));
 				if (j % MAXK == MAXK - 1) printf("|");
 				else printf(" ");
 			}
@@ -353,9 +359,9 @@ public:
 			if (!check_grid(now_grid))
 				dfs_grid(now_grid);
 			point(now_grid, move).print();
+			print_board(point(now_grid, move));
 			now_grid = move;
 			is_x = !is_x;
-			print_board();
 			std::cout << count_point(true) << " : " << count_point(false) << std::endl << std::endl;
 			if (PRINT_EVAL && ret.second != uninitialized) std::cout << "Computer Eval: " << ret.second << std::endl << std::endl;
 		}
@@ -462,7 +468,10 @@ public:
 		}
 		static inline std::pair<int, double> computer_move(bool is_x, int now_grid)
 		{
-			return abdfs(MAXDEPTH, is_x, now_grid);
+			long long t = clock();
+			auto ret = abdfs(MAXDEPTH, is_x, now_grid);
+			Sleep(std::max(0ll, 1000 + t - clock()));
+			return ret;
 		}
 		static inline std::pair<int, double> cvsc_move(bool is_x, int now_grid)
 		{
