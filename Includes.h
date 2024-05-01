@@ -4,6 +4,7 @@
 #define NOMINMAX
 #include <unordered_map>
 #include <windows.h>
+#include <algorithm>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -21,7 +22,7 @@ static std::mt19937_64 rng(time(0) & 0x114514 | 0x1919810 ^ 5418);
 static int abcnt = 0;
 
 #ifdef USING_NORMAL_BOARD
-static const std::vector<std::tuple<int, int, int>> tttlines = { {0, 1, 2}, {6, 7, 8}, {0, 3, 6}, {2, 5, 8}, {0, 4, 8}, {1, 4, 7}, {2, 4, 6}, {3, 4, 5} };
+static const std::vector<std::tuple<int, int, int>> tttlines = { std::make_tuple(0, 1, 2), std::make_tuple(6, 7, 8), std::make_tuple(0, 3, 6), std::make_tuple(2, 5, 8), std::make_tuple(0, 4, 8), std::make_tuple(1, 4, 7), std::make_tuple(2, 4, 6), std::make_tuple(3, 4, 5) };
 static std::vector<std::pair<int, int>> tttlines_with_num[10];
 #endif
 
@@ -61,6 +62,15 @@ public:
 		point to_point() const { int m_x = x / MAXK, m_y = y / MAXK, g_x = x % MAXK, g_y = y % MAXK; return point(MAXK * m_x + m_y, MAXK * g_x + g_y); }
 #endif
 	};
+	static inline std::string tostr(double n)
+	{
+		std::string res, res2;
+		int k = (int)n; n -= k;
+		while (k != 0) res += (k % 10 + '0'), k /= 10;
+		std::reverse(res.begin(), res.end());
+		while (n != 0) n *= 10, res2 += ((int)n + '0'), n = n - (int)n;
+		return res + '.' + res2;
+	}
 	static inline char status_to_char(status st)
 	{
 		if (st == X) return 'X';
@@ -73,6 +83,17 @@ public:
 		for (int i = 0; i < MAXN; i++)
 		{
 			if (memo[grid][i] == BLANK) return true;
+		}
+		return false;
+	}
+	static inline bool check_grid_in_dfs(int grid)
+	{
+		for (int i = 0; i < MAXN; i++)
+		{
+			if (memo[grid][i] == BLANK)
+			{
+				if (check_grid(i)) return true;
+			}
 		}
 		return false;
 	}
@@ -100,6 +121,7 @@ public:
 		status st = is_x ? X : O;
 		for (int i : ord)
 		{
+			if (memo[grid_num][i] != BLANK || !check_grid_in_dfs(i)) continue;
 			bool marked = false;
 			for (auto& j : tttlines_with_num[i])
 			{
@@ -111,7 +133,6 @@ public:
 					break;
 				}
 #endif
-
 #ifdef USING_LARGER_BOARD
 				bool t = true;
 				for (auto& k : j)
@@ -142,7 +163,7 @@ public:
 			for (auto& j : tttlines)
 			{
 #ifdef USING_NORMAL_BOARD
-				int a = memo[i][get<0>(j)], b = memo[i][get<1>(j)], c = memo[i][get<2>(j)];
+				int a = memo[i][std::get<0>(j)], b = memo[i][std::get<1>(j)], c = memo[i][std::get<2>(j)];
 				int k = ((a == st) + (b == st) + (c == st));
 				if (a == BANNED || b == BANNED || c == BANNED || a == notst || b == notst || c == notst) k = 0;
 				if (k == 1) cnt += heur1;
@@ -178,7 +199,7 @@ public:
 		{
 			for (auto& j : tttlines)
 #ifdef USING_NORMAL_BOARD
-				cnt += (memo[i][get<0>(j)] == st && memo[i][get<1>(j)] == st && memo[i][get<2>(j)] == st);
+				cnt += (memo[i][std::get<0>(j)] == st && memo[i][std::get<1>(j)] == st && memo[i][std::get<2>(j)] == st);
 #endif
 #ifdef USING_LARGER_BOARD
 			{
@@ -207,11 +228,11 @@ public:
 #ifdef USING_NORMAL_BOARD
 		for (int i = 0; i < MAXN; i++)
 			for (auto& j : tttlines)
-				if (get<0>(j) == i || get<1>(j) == i || get<2>(j) == i)
+				if (std::get<0>(j) == i || std::get<1>(j) == i || std::get<2>(j) == i)
 				{
-					if (get<0>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<1>(j), get<2>(j)));
-					if (get<1>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<0>(j), get<2>(j)));
-					if (get<2>(j) == i) tttlines_with_num[i].push_back(std::make_pair(get<0>(j), get<1>(j)));
+					if (std::get<0>(j) == i) tttlines_with_num[i].push_back(std::make_pair(std::get<1>(j), std::get<2>(j)));
+					if (std::get<1>(j) == i) tttlines_with_num[i].push_back(std::make_pair(std::get<0>(j), std::get<2>(j)));
+					if (std::get<2>(j) == i) tttlines_with_num[i].push_back(std::make_pair(std::get<0>(j), std::get<1>(j)));
 				}
 #endif
 #ifdef USING_LARGER_BOARD
@@ -280,15 +301,15 @@ public:
 	static inline void __debuginit()
 	{
 		std::string aa[MAXN] = {
-			"XXOXXXOOX",
-			"OXOO*OOX*",
-			"O XOOOOXO",
-			"X*XOOOOOO",
-			"XXOOXO*XX",
-			"XXOOOOOXX",
-			"OXXXX XXX",
-			"OXXOXXXXX",
-			"XXOOOOXOO"
+			"XOOX OXOX",
+			"*XOXXXXX ",
+			"OXOXX O*O",
+			"OOOOOOXO ",
+			"X*OOXOXX ",
+			"OOOOOOOX ",
+			"XXX*OOX X",
+			"XXXXXOXX ",
+			"OXXOXOOX "
 		};
 		for (int i = 0; i < MAXN; i++) for (int j = 0; j < MAXN; j++) {
 			int x = coord(i, j).to_point().grid, y = coord(i, j).to_point().num;
@@ -308,7 +329,6 @@ public:
 		int best_move;
 		for (int& i : get_grid_point_in_order(is_x, grid))
 		{
-			if (memo[grid][i] != BLANK || !check_grid(i)) continue;
 			memo[grid][i] = (is_x ? X : O);
 			double diff = (depth == 1 ? (USING_HEURISTICS ? get_heuristic_point_diff() : get_point_diff()) : abdfs(depth - 1, !is_x, i, alpha, beta).second);
 			memo[grid][i] = BLANK;
@@ -338,17 +358,17 @@ public:
 			}
 		}
 		if (best_diff == uninit) return std::make_pair(-1, (double)get_point_diff());
-		if (count(equals.begin(), equals.end(), center) > 0) best_move = center;
+		if (std::count(equals.begin(), equals.end(), center) > 0) best_move = center;
 		else {
 			best_move = equals[0];
 			best_move = equals[rng() % (int)equals.size()];
 		}
 		return std::make_pair(best_move, best_diff);
 	}
-	static inline void game(std::pair<int, double>(*move_func)(bool, int))
+	static inline void game(std::pair<int, double>(*move_func)(bool, int), int first_grid = center)
 	{
 		int move_num = 0;
-		int now_grid = center;
+		int now_grid = first_grid;
 		bool is_x = true;
 		while (check_grid(now_grid))
 		{
@@ -362,10 +382,10 @@ public:
 			print_board(point(now_grid, move));
 			now_grid = move;
 			is_x = !is_x;
-			std::cout << count_point(true) << " : " << count_point(false) << std::endl << std::endl;
-			if (PRINT_EVAL && ret.second != uninitialized) std::cout << "Computer Eval: " << ret.second << std::endl << std::endl;
+			std::cout << count_point(true) << " : " << count_point(false) << "+" + tostr(komi) << std::endl << std::endl;
+			if (PRINT_EVAL && ret.second != uninitialized) std::cout << "Computer Eval: " << ret.second - komi << std::endl << std::endl;
 		}
-		int diff = get_point_diff();
+		double diff = get_point_diff() - komi;
 		if (diff > 0) std::cout << "X Wins!!!!" << std::endl;
 		else if (diff < 0) std::cout << "O Wins!!!!" << std::endl;
 		else std::cout << "What a TIE!!!!" << std::endl;
@@ -390,26 +410,27 @@ public:
 	{
 		if (playing_mode != GET_FROM_USER_INPUT) return;
 		std::string input;
-		std::cout << "Which mode do you want to play in? Type CVSC, CVSP, PVSC, or PVSP below.\n";
-		if (version == CHI) std::cout << "ä½ æƒ³è¦çŽ©ä»€ä¹ˆæ¨¡å¼ï¼Ÿè¯·è¾“å…¥ CVSC, CVSP, PVSC, æˆ–è€… PVSPã€‚Pä»£è¡¨äººï¼ŒCä»£è¡¨æœºã€‚\n";
+		std::cout << "Which mode do you want to play in? Type CVSC, CVSP, PVSC, PVSP, or TVSC below.\n";
+		if (version == CHI) std::cout << "ÄãÏëÒªÍæÊ²Ã´Ä£Ê½£¿ÇëÊäÈë CVSC, CVSP, PVSC, PVSP, »òÕß TVSC¡£P´ú±íÈË, C´ú±í»ú, T´ú±í·´Éí²ßÂÔ¡£\n";
 		std::cin >> input;
 		while (input != "CVSC" && input != "CVSP" && input != "PVSC" && input != "PVSP")
 		{
-			std::cout << "Input error! Please input CVSC, CVSP, PVSC, or PVSP again below.\n";
-			if (version == CHI) std::cout << "è¾“å…¥é”™è¯¯ï¼è¯·å†æ¬¡è¾“å…¥ CVSC, CVSP, PVSC, æˆ–è€… PVSPã€‚\n";
+			std::cout << "Input error! Please input CVSC, CVSP, PVSC, PVSP, or TVSC again below.\n";
+			if (version == CHI) std::cout << "ÊäÈë´íÎó£¡ÇëÔÙ´ÎÊäÈë CVSC, CVSP, PVSC, PVSP, »òÕß TVSC¡£\n";
 			std::cin >> input;
 		}
 		if (input == "CVSC") playing_mode = CVSC;
 		else if (input == "CVSP") playing_mode = CVSP;
 		else if (input == "PVSC") playing_mode = PVSC;
 		else if (input == "PVSP") playing_mode = PVSP;
+		else if (input == "TVSC") playing_mode = TVSC;
 	}
 	static inline void greet_player()
 	{
-		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "æ¬¢è¿Žæ¥çŽ©æ•°ç‹¬äº•å­—æ£‹ï¼\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ä½ åº”è¯¥å·²ç»æ‡‚å¾—æ€Žä¹ˆçŽ©è¿™çŽ©æ„å„¿äº†ã€‚\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "è¾“å…¥åæ ‡æ—¶ï¼Œå…ˆè¾“å…¥ç«–ç€çš„ï¼Œå†è¾“æ¨ªç€çš„ã€‚\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "åæ ‡å¦‚ä¸‹ï¼š\n"; std::cout << "\n";
+		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "»¶Ó­À´ÍæÊý¶À¾®×ÖÆå£¡\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ÄãÓ¦¸ÃÒÑ¾­¶®µÃÔõÃ´ÍæÕâÍæÒâ¶ùÁË¡£\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "ÊäÈë×ø±êÊ±£¬ÏÈÊäÈëÊú×ÅµÄ£¬ÔÙÊäºá×ÅµÄ¡£\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "×ø±êÈçÏÂ£º\n"; std::cout << "\n";
 		std::cout << "  ";
 		for (int i = 1; i <= MAXN; i++) std::cout << i % 10 << " ";
 		std::cout << std::endl;
@@ -435,17 +456,17 @@ public:
 		std::cout << std::endl;
 #ifdef USING_LARGER_BOARD
 		std::cout << "The coordinates appearing on the screen have been modded by 10. But when you type them, please type the original coordinates.\n";
-		if (version == CHI) std::cout << "æ˜¾ç¤ºçš„åæ ‡éƒ½è¢«åšäº†æ¨¡10è¿ç®—ï¼Œä½†å½“ä½ è¾“å…¥åæ ‡æ—¶ï¼Œè¯·è¾“å…¥åŽŸæ¥çš„åæ ‡ã€‚\n";
+		if (version == CHI) std::cout << "ÏÔÊ¾µÄ×ø±ê¶¼±»×öÁËÄ£10ÔËËã£¬µ«µ±ÄãÊäÈë×ø±êÊ±£¬ÇëÊäÈëÔ­À´µÄ×ø±ê¡£\n";
 		std::cout << std::endl;
 		Sleep(1000);
 #endif
 		get_playing_mode();
 		std::cout << std::endl;
-		if (playing_mode == CVSC) { std::cout << "You're playing in computer mode.\n"; if (version == CHI) std::cout << "çŽ°åœ¨æ˜¯ç”µè„‘å¯¹æˆ˜æ¨¡å¼ã€‚\n"; }
-		else if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "ç”µè„‘å…ˆï¼Œä½ åŽã€‚\n"; }
-		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ä½ å…ˆï¼Œç”µè„‘åŽã€‚\n"; }
-		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "çŽ°åœ¨æ˜¯åŒäººæ¨¡å¼ã€‚\n"; }
-		std::cout << "\nLet's start!\n"; if (version == CHI) std::cout << "æˆ‘ä»¬å¼€å§‹å§ï¼\n"; std::cout << "\n"; Sleep(1000);
+		if (playing_mode == CVSC) { std::cout << "You're playing in computer mode.\n"; if (version == CHI) std::cout << "ÏÖÔÚÊÇµçÄÔ¶ÔÕ½Ä£Ê½¡£\n"; }
+		else if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "µçÄÔÏÈ£¬Äãºó¡£\n"; }
+		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ÄãÏÈ£¬µçÄÔºó¡£\n"; }
+		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "ÏÖÔÚÊÇË«ÈËÄ£Ê½¡£\n"; }
+		std::cout << "\nLet's start!\n"; if (version == CHI) std::cout << "ÎÒÃÇ¿ªÊ¼°É£¡\n"; std::cout << "\n"; Sleep(1000);
 	}
 	class Moves
 	{
@@ -453,24 +474,71 @@ public:
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			std::cout << "Your Move:\n\nEnter coordinates:\n"; if (version == CHI) std::cout << "è¾“å…¥åæ ‡ï¼š\n";
+			std::cout << "Your Move:\n\nEnter coordinates:\n"; if (version == CHI) std::cout << "ÊäÈë×ø±ê£º\n";
 			std::cin >> x >> y;
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
 				if (std::cin.fail()) std::cin.clear(), std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-				std::cout << "\nInvalid input! Try again:\n"; if (version == CHI) std::cout << "è¾“å…¥é”™è¯¯ï¼è¯·é‡æ–°è¾“å…¥ï¼š\n";
+				std::cout << "\nInvalid input! Try again:\n"; if (version == CHI) std::cout << "ÊäÈë´íÎó£¡ÇëÖØÐÂÊäÈë£º\n";
 				std::cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
 			}
 			return p.num;
 		}
+		static inline int tiger_move(int now_grid)
+		{
+			long long t = clock();
+			if (memo[now_grid][center] == BLANK)
+			{
+#ifndef TESTING
+				Sleep(std::max(0ll, 1000 + t - clock()));
+#endif
+				return center;
+			}
+			bool isbanned = false, full = true;
+			for (int i = 0; i < 9; i++)
+				if (memo[now_grid][i] == BANNED)
+				{
+					isbanned = true;
+					break;
+				}
+			if (isbanned && memo[now_grid][now_grid] == BLANK)
+			{
+#ifndef TESTING
+				Sleep(std::max(0ll, 1000 + t - clock()));
+#endif
+				return now_grid;
+			}
+			for (int i = 0; i < 9; i++)
+			{
+				isbanned = false; full = true;
+				for (int j = 0; j < 9; j++)
+				{
+					if (memo[i][j] == BANNED) isbanned = true;
+					if (memo[i][j] == BLANK) full = false;
+				}
+				if (isbanned && !full)
+				{
+#ifndef TESTING
+					Sleep(std::max(0ll, 1000 + t - clock()));
+#endif
+					return i;
+				}
+			}
+#ifndef TESTING
+			Sleep(std::max(0ll, 1000 + t - clock()));
+#endif
+			return 0;
+		}
 		static inline std::pair<int, double> computer_move(bool is_x, int now_grid)
 		{
 			long long t = clock();
 			auto ret = abdfs(MAXDEPTH, is_x, now_grid);
+#ifndef TESTING
 			Sleep(std::max(0ll, 1000 + t - clock()));
+#endif
 			return ret;
 		}
 		static inline std::pair<int, double> cvsc_move(bool is_x, int now_grid)
@@ -492,12 +560,18 @@ public:
 		{
 			return std::make_pair(human_move(now_grid), uninitialized);
 		}
+		static inline std::pair<int, double> tvsc_move(bool is_x, int now_grid)
+		{
+			if (is_x) return std::make_pair(tiger_move(now_grid), uninitialized);
+			else return computer_move(is_x, now_grid);
+		}
 		static inline std::pair<int, double> auto_move(bool is_x, int now_grid)
 		{
 			if (playing_mode == CVSC) return cvsc_move(is_x, now_grid);
 			if (playing_mode == CVSP) return cvsp_move(is_x, now_grid);
 			if (playing_mode == PVSC) return pvsc_move(is_x, now_grid);
 			if (playing_mode == PVSP) return pvsp_move(is_x, now_grid);
+			if (playing_mode == TVSC) return tvsc_move(is_x, now_grid);
 		}
 	};
 };

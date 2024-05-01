@@ -1,3 +1,4 @@
+#pragma once
 #include "Includes.h"
 
 signed main()
@@ -10,4 +11,7 @@ signed main()
 	SudokuTicTacToe::init();
 	SudokuTicTacToe::game(SudokuTicTacToe::Moves::auto_move);
 	SudokuTicTacToe::print_result(start_time);
+	std::cout << std::endl << "Press Enter to Close Screen:" << std::endl;
+	if (version == CHI) std::cout << "Çë°´ Enter ¼ü¹Ø±ÕÆÁÄ»£º" << std::endl;
+	std::cin.get(); std::cin.get();
 }
