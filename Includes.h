@@ -453,7 +453,7 @@ public:
 		std::cout << "Which mode do you want to play in? Type CVSC, CVSP, PVSC, PVSP, or TVSC below.\n";
 		if (version == CHI) std::cout << "你想要玩什么模式？请输入 CVSC, CVSP, PVSC, PVSP, 或者 TVSC。P代表人, C代表机, T代表反身策略。\n";
 		std::cin >> input;
-		while (input != "CVSC" && input != "CVSP" && input != "PVSC" && input != "PVSP")
+		while (input != "CVSC" && input != "CVSP" && input != "PVSC" && input != "PVSP" && input != "TVSC")
 		{
 			std::cout << "Input error! Please input CVSC, CVSP, PVSC, PVSP, or TVSC again below.\n";
 			if (version == CHI) std::cout << "输入错误！请再次输入 CVSC, CVSP, PVSC, PVSP, 或者 TVSC。\n";
