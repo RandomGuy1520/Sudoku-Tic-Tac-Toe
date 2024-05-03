@@ -25,7 +25,7 @@ It is a variant of tic-tac-toe, or more precisely, a variant of a tic-tac-toe va
 
 Note:
 
-This program's time complexity is O(C * N ^ (D + 4)) in CVSC mode, where D is the search depth, and C is the alpha-beta pruning constant, which is around 1e-5 to 4e-5.
+This program's time complexity is O(C * N ^ (D + 3)) in CVSC mode, where D is the search depth, and C is the alpha-beta pruning constant, which is around 1e-5 to 4e-5.
 A common strategy of the game is called the Tiger Strategy, where you can figure it out yourselves about what it is by using Tiger Strategy vs Computer mode.
 
 In my code, you can:

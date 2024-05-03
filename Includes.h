@@ -11,15 +11,16 @@
 #include <random>
 #include <string>
 #include <time.h>
+#include <queue>
 #include <tuple>
 
 #include "config.h"
 
 #define assert(x, y) if (!(x)) { throw(y); }
 
-static status memo[MAXN][MAXN];
+static status memo[MAXN][MAXN]; // please change memo only using the change_status function of class STTT.
 static std::mt19937_64 rng(time(0) & 0x114514 | 0x1919810 ^ 5418);
-static int abcnt = 0;
+static int blank[MAXN], abcnt = 0;
 
 #ifdef USING_NORMAL_BOARD
 static const std::vector<std::tuple<int, int, int>> tttlines = { std::make_tuple(0, 1, 2), std::make_tuple(6, 7, 8), std::make_tuple(0, 3, 6), std::make_tuple(2, 5, 8), std::make_tuple(0, 4, 8), std::make_tuple(1, 4, 7), std::make_tuple(2, 4, 6), std::make_tuple(3, 4, 5) };
@@ -46,8 +47,8 @@ public:
 			int m_x = grid / MAXK, m_y = grid % MAXK, g_x = num / MAXK, g_y = num % MAXK;
 			std::cout << MAXK * m_x + g_x + 1 << " " << MAXK * m_y + g_y + 1 << std::endl;
 		}
-		status get_status() const { return memo[grid][num]; }
-		void change_status(status st) { memo[grid][num] = st; }
+		status get_status() const { return SudokuTicTacToe::get_status(grid, num); }
+		void change_status(status st) { SudokuTicTacToe::change_status(grid, num, st); }
 	};
 	struct coord
 	{
@@ -62,6 +63,18 @@ public:
 		point to_point() const { int m_x = x / MAXK, m_y = y / MAXK, g_x = x % MAXK, g_y = y % MAXK; return point(MAXK * m_x + m_y, MAXK * g_x + g_y); }
 #endif
 	};
+	static inline status get_status(int grid, int num)
+	{
+		return memo[grid][num];
+	}
+	static inline void change_status(int grid, int num, status st)
+	{
+		int tot = 0;
+		if (memo[grid][num] == BLANK) tot--;
+		if (st == BLANK) tot++;
+		memo[grid][num] = st;
+		blank[grid] += tot;
+	}
 	static inline std::string tostr(double n)
 	{
 		std::string res, res2;
@@ -80,22 +93,7 @@ public:
 	}
 	static inline bool check_grid(int grid)
 	{
-		for (int i = 0; i < MAXN; i++)
-		{
-			if (memo[grid][i] == BLANK) return true;
-		}
-		return false;
-	}
-	static inline bool check_grid_in_dfs(int grid)
-	{
-		for (int i = 0; i < MAXN; i++)
-		{
-			if (memo[grid][i] == BLANK)
-			{
-				if (check_grid(i)) return true;
-			}
-		}
-		return false;
+		return blank[grid] != 0;
 	}
 	static inline std::string get_board_fen()
 	{
@@ -104,7 +102,7 @@ public:
 		{
 			for (int j = 0; j < MAXN; j++)
 			{
-				res += (memo[i][j] + '0');
+				res += (get_status(i, j) + '0');
 			}
 		}
 		return res;
@@ -112,6 +110,18 @@ public:
 	static inline size_t get_board_hash()
 	{
 		return std::hash<std::string>{}(get_board_fen());
+	}
+	static inline int get_depth()
+	{
+		if (USING_CONSTANT_TIME)
+		{
+			// More scientific way of calculating the right depth
+			double tot = 0, cnt = 0;
+			for (int i = 0; i < MAXN; i++) tot += blank[i], cnt += blank[i] * blank[i];
+			if (tot <= 1) return 1;
+			return std::min((int)tot, (int)round((log(10) * 13 + log(MAXSEC)) / log(cnt / tot)) - 3);
+		}
+		else return MAXDEPTH;
 	}
 	static inline std::vector<int> get_grid_point_in_order(bool is_x, int grid_num)
 	{
@@ -121,12 +131,12 @@ public:
 		status st = is_x ? X : O;
 		for (int i : ord)
 		{
-			if (memo[grid_num][i] != BLANK || !check_grid_in_dfs(i)) continue;
+			if (get_status(grid_num, i) != BLANK || !check_grid(i)) continue;
 			bool marked = false;
 			for (auto& j : tttlines_with_num[i])
 			{
 #ifdef USING_NORMAL_BOARD
-				if (memo[grid_num][j.first] == st && memo[grid_num][j.second] == st)
+				if (get_status(grid_num, j.first) == st && get_status(grid_num, j.second) == st)
 				{
 					ans1.push_back(i);
 					marked = true;
@@ -136,7 +146,7 @@ public:
 #ifdef USING_LARGER_BOARD
 				bool t = true;
 				for (auto& k : j)
-					if (memo[grid_num][k] != st)
+					if (get_status(grid_num, k) != st)
 					{
 						t = false;
 						break;
@@ -163,7 +173,7 @@ public:
 			for (auto& j : tttlines)
 			{
 #ifdef USING_NORMAL_BOARD
-				int a = memo[i][std::get<0>(j)], b = memo[i][std::get<1>(j)], c = memo[i][std::get<2>(j)];
+				int a = get_status(i, std::get<0>(j)), b = get_status(i, std::get<1>(j)), c = get_status(i, std::get<2>(j));
 				int k = ((a == st) + (b == st) + (c == st));
 				if (a == BANNED || b == BANNED || c == BANNED || a == notst || b == notst || c == notst) k = 0;
 				if (k == 1) cnt += heur1;
@@ -174,12 +184,12 @@ public:
 				int tot = 0;
 				for (auto& k : j)
 				{
-					if (memo[i][k] == BANNED || memo[i][k] == notst)
+					if (get_status(i, k) == BANNED || get_status(i, k) == notst)
 					{
 						tot = 0;
 						break;
 					}
-					tot += (memo[i][k] == st);
+					tot += (get_status(i, k) == st);
 				}
 				cnt += heur[tot];
 #endif
@@ -199,13 +209,13 @@ public:
 		{
 			for (auto& j : tttlines)
 #ifdef USING_NORMAL_BOARD
-				cnt += (memo[i][std::get<0>(j)] == st && memo[i][std::get<1>(j)] == st && memo[i][std::get<2>(j)] == st);
+				cnt += (get_status(i, std::get<0>(j)) == st && get_status(i, std::get<1>(j)) == st && get_status(i, std::get<2>(j)) == st);
 #endif
 #ifdef USING_LARGER_BOARD
 			{
 				bool t = true;
 				for (auto& k : j)
-					if (memo[i][k] != st)
+					if (get_status(i, k) != st)
 					{
 						t = false;
 						break;
@@ -225,6 +235,7 @@ public:
 		for (int i = 0; i < MAXN; i++)
 			for (int j = 0; j < MAXN; j++)
 				memo[i][j] = BLANK;
+		for (int i = 0; i < MAXN; i++) blank[i] = MAXN;
 #ifdef USING_NORMAL_BOARD
 		for (int i = 0; i < MAXN; i++)
 			for (auto& j : tttlines)
@@ -281,10 +292,10 @@ public:
 				if (last_move.grid == p.grid && last_move.num == p.num)
 				{
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9);
-					printf("%c", status_to_char(memo[p.grid][p.num]));
+					printf("%c", status_to_char(p.get_status()));
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
 				}
-				else printf("%c", status_to_char(memo[p.grid][p.num]));
+				else printf("%c", status_to_char(p.get_status()));
 				if (j % MAXK == MAXK - 1) printf("|");
 				else printf(" ");
 			}
@@ -300,23 +311,34 @@ public:
 	}
 	static inline void __debuginit()
 	{
+		init();
 		std::string aa[MAXN] = {
-			"XOOX OXOX",
-			"*XOXXXXX ",
-			"OXOXX O*O",
-			"OOOOOOXO ",
+			"  *  XOOX",
+			"XX XX XXO",
+			"XX XX *XO",
+			"OOOOOO  X",
 			"X*OOXOXX ",
-			"OOOOOOOX ",
-			"XXX*OOX X",
-			"XXXXXOXX ",
-			"OXXOXOOX "
+			"OOOOOOXX ",
+			"OOOOOO  X",
+			"XXO*XOXX ",
+			"X*OOXOXX "
 		};
-		for (int i = 0; i < MAXN; i++) for (int j = 0; j < MAXN; j++) {
+		for (int i = 0; i < MAXN; i++) for (int j = 0; j < MAXN; j++)
+		{
 			int x = coord(i, j).to_point().grid, y = coord(i, j).to_point().num;
 			if (aa[i][j] == 'O') memo[x][y] = O;
 			if (aa[i][j] == 'X') memo[x][y] = X;
 			if (aa[i][j] == '*') memo[x][y] = BANNED;
 			if (aa[i][j] == ' ') memo[x][y] = BLANK;
+		}
+		for (int i = 0; i < MAXN; i++)
+		{
+			int cnt = 0;
+			for (int j = 0; j < MAXN; j++)
+			{
+				if (memo[i][j] == BLANK) cnt++;
+			}
+			blank[i] = cnt;
 		}
 		print_board();
 	}
@@ -329,9 +351,26 @@ public:
 		int best_move;
 		for (int& i : get_grid_point_in_order(is_x, grid))
 		{
-			memo[grid][i] = (is_x ? X : O);
+			change_status(grid, i, is_x ? X : O);
+			std::vector<point> changed; std::queue<int> q;
+			if (!check_grid(grid)) q.push(grid);
+			if (blank[4] < 0) __debugbreak();
+			while (!q.empty())
+			{
+				int _grid = q.front(); q.pop();
+				for (int j = 0; j < MAXN; j++)
+					if (j != _grid && get_status(j, _grid) == BLANK)
+					{
+						change_status(j, _grid, BANNED);
+						changed.push_back(point(j, _grid));
+						if (!check_grid(j))
+							q.push(j);
+					}
+			}
 			double diff = (depth == 1 ? (USING_HEURISTICS ? get_heuristic_point_diff() : get_point_diff()) : abdfs(depth - 1, !is_x, i, alpha, beta).second);
-			memo[grid][i] = BLANK;
+			for (point& j : changed)
+				j.change_status(BLANK);
+			change_status(grid, i, BLANK);
 			if (is_x && diff >= best_diff)
 			{
 				if (diff > best_diff)
@@ -375,7 +414,7 @@ public:
 			move_num++;
 			std::pair<int, double> ret = move_func(is_x, now_grid);
 			int move = ret.first;
-			memo[now_grid][move] = (is_x ? X : O);
+			change_status(now_grid, move, is_x ? X : O);
 			if (!check_grid(now_grid))
 				dfs_grid(now_grid);
 			point(now_grid, move).print();
@@ -383,7 +422,8 @@ public:
 			now_grid = move;
 			is_x = !is_x;
 			std::cout << count_point(true) << " : " << count_point(false) << "+" + tostr(komi) << std::endl << std::endl;
-			if (PRINT_EVAL && ret.second != uninitialized) std::cout << "Computer Eval: " << ret.second - komi << std::endl << std::endl;
+			if (PRINT_EVAL && ret.second != uninitialized) std::cout << "Computer Eval: " << ret.second - komi << std::endl;
+			std::cout << "Computer Depth: " << get_depth() << std::endl << std::endl;
 		}
 		double diff = get_point_diff() - komi;
 		if (diff > 0) std::cout << "X Wins!!!!" << std::endl;
@@ -394,9 +434,9 @@ public:
 	static inline void dfs_grid(int grid)
 	{
 		for (int i = 0; i < MAXN; i++)
-			if (i != grid && memo[i][grid] == BLANK)
+			if (i != grid && get_status(i, grid) == BLANK)
 			{
-				memo[i][grid] = BANNED;
+				change_status(i, grid, BANNED);
 				if (!check_grid(i))
 					dfs_grid(i);
 			}
@@ -490,7 +530,7 @@ public:
 		static inline int tiger_move(int now_grid)
 		{
 			long long t = clock();
-			if (memo[now_grid][center] == BLANK)
+			if (get_status(now_grid, center) == BLANK)
 			{
 #ifndef TESTING
 				Sleep(std::max(0ll, 1000 + t - clock()));
@@ -498,26 +538,26 @@ public:
 				return center;
 			}
 			bool isbanned = false, full = true;
-			for (int i = 0; i < 9; i++)
-				if (memo[now_grid][i] == BANNED)
+			for (int i = 0; i < MAXN; i++)
+				if (get_status(now_grid, i) == BANNED)
 				{
 					isbanned = true;
 					break;
 				}
-			if (isbanned && memo[now_grid][now_grid] == BLANK)
+			if (isbanned && get_status(now_grid, now_grid) == BLANK)
 			{
 #ifndef TESTING
 				Sleep(std::max(0ll, 1000 + t - clock()));
 #endif
 				return now_grid;
 			}
-			for (int i = 0; i < 9; i++)
+			for (int i = 0; i < MAXN; i++)
 			{
 				isbanned = false; full = true;
-				for (int j = 0; j < 9; j++)
+				for (int j = 0; j < MAXN; j++)
 				{
-					if (memo[i][j] == BANNED) isbanned = true;
-					if (memo[i][j] == BLANK) full = false;
+					if (get_status(i, j) == BANNED) isbanned = true;
+					if (get_status(i, j) == BLANK) full = false;
 				}
 				if (isbanned && !full)
 				{
@@ -534,10 +574,10 @@ public:
 		}
 		static inline std::pair<int, double> computer_move(bool is_x, int now_grid)
 		{
-			long long t = clock();
-			auto ret = abdfs(MAXDEPTH, is_x, now_grid);
+			int t = clock();
+			auto ret = abdfs(get_depth(), is_x, now_grid);
 #ifndef TESTING
-			Sleep(std::max(0ll, 1000 + t - clock()));
+			Sleep(std::max(0ll, 1000ll + t - clock()));
 #endif
 			return ret;
 		}
@@ -575,3 +615,5 @@ public:
 		}
 	};
 };
+
+#define STTT SudokuTicTacToe
