@@ -9,7 +9,7 @@ const enum status { BLANK, X, O, BANNED };
 const enum mode { CVSC, CVSP, PVSC, PVSP, TVSC, GET_FROM_USER_INPUT };
 const enum lang { ENG, CHI };
 
-const int MAXK = 3, MAXN = MAXK * MAXK, MAXSEC = 1;
+const int MAXK = 3, MAXN = MAXK * MAXK, MAXSEC = 2;
 const bool PRINT_EVAL = true, USING_HEURISTICS = true, USING_CONSTANT_TIME = true;
 const double uninitialized = 1e9; // Uninitialized is not necessary to change
 const lang version = CHI; // Language version
@@ -18,7 +18,7 @@ const int depths[10] = { 0, 0, 16, 11, 7, 6, 4, 3 };
 const int MAXDEPTH = depths[MAXK];
 
 #ifdef USING_NORMAL_BOARD
-const double heur1 = 1.0 / 6, heur2 = 1.0 / 2, komi = 3.5; // Initial heuristics for 9 * 9 board (best by test).
+const double heur1 = 1.0 / 6, heur2 = 1.0 / 2, komi = 0; // Initial heuristics for 9 * 9 board (best by test).
 #endif
 
 #ifdef USING_LARGER_BOARD
