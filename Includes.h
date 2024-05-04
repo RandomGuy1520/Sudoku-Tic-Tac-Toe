@@ -78,7 +78,7 @@ public:
 	}
 	static inline std::string tostr(double n)
 	{
-		bool op = (n > 0); n = abs(n);
+		bool op = (n >= 0); n = abs(n);
 		std::string res, res2 = ".";
 		if ((int)n == 0) res = "0";
 		else {
