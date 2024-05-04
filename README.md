@@ -2,9 +2,9 @@ Copyright © by RandomGuy1520
 
 This is the code for:
 
-Sudoku Tic-Tac-Toe Calculator & Simulator 4.2 Version
+Sudoku Tic-Tac-Toe Calculator & Simulator 5.2 Version
 
-In short: STTTCS 4.2 ver
+In short: STTTCS 5.2 ver
 
 Game Rules:
 
