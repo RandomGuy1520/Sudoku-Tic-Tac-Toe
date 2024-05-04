@@ -8,11 +8,11 @@ In short: STTTCS 5.2 ver
 
 Game Rules:
 
-Behold are the rules of Sudoku Tic-Tac-Toe. It is Sudoku since it uses a Sudoku board. It is also Tic-Tac-Toe since its score-counting is tic-tac-toe rules.
+Behold are the rules of Sudoku Tic-Tac-Toe. It is Sudoku since it uses a Sudoku board. It is also Tic-Tac-Toe since its score-counting uses tic-tac-toe rules.
 At first, there will be an N * N blank board, usually N = 9. Let K be sqrt(N). The blank board consists of N (K * K) grids, and each grid consists of N squares.
-Player X and player O take turns placing 'X's and 'O's in one of the squares on the board. Player X goes first. The first move must be played in the center grid.
+Player X and player O take turns placing 'X's and 'O's in one of the squares on the board. Player X goes first. The first move is placed freely.
 If K is even, the center grid will be the left-top of the four centers. After the first move, the player is forced to play in a certain grid indicated by the last move as follows:
-The relative position to the next grid to the whole board is equal to the relative position of the previous square to the grid that includes the previous square.
+The relative position of the next grid to the whole board is equal to the relative position of the previous square to the grid that includes the previous square.
 For example, if the m-th move is played in the center of the board, then the m+1 move must be played in N of the center grid.
 For another example, if the n-th move is played in the right-top corner square of any grid, then the n+1 move must be played in the right-top grid of the board.
 Banned squares: If a grid is full (every N of its squares is placed by X or O or is banned), then every square leading to this grid shall be banned.
