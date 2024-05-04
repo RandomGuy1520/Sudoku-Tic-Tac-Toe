@@ -18,7 +18,7 @@ const int depths[10] = { 0, 0, 16, 11, 7, 6, 4, 3 };
 const int MAXDEPTH = depths[MAXK];
 
 #ifdef USING_NORMAL_BOARD
-const double heur1 = 1.0 / 6, heur2 = 1.0 / 2, komi = 0; // Initial heuristics for 9 * 9 board (best by test).
+const double heur1 = 1.0 / 6, heur2 = 1.0 / 2, komi = 2; // Initial heuristics for 9 * 9 board (best by test).
 #endif
 
 #ifdef USING_LARGER_BOARD
