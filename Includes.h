@@ -129,7 +129,7 @@ public:
 			double tot = 0, cnt = 0;
 			for (int i = 0; i < MAXN; i++) tot += blank[i], cnt += blank[i] * blank[i];
 			if (tot <= 1 || cnt == tot) return 1;
-			return std::min((int)tot, (int)round((log(10) * 13 + log(MAXSEC)) / log(cnt / tot)) - 4);
+			return std::min((int)tot, (int)round((log(10) * 13 + log(MAXSEC)) / log(cnt / tot) - 3.5));
 		}
 		else return MAXDEPTH;
 	}
@@ -538,12 +538,12 @@ public:
 		if (playing_mode != GET_FROM_USER_INPUT) return;
 		std::string input;
 		std::cout << "Which mode do you want to play in? Type CVSC, CVSP, PVSC, PVSP, TVSC, or TVSP below.\n";
-		if (version == CHI) std::cout << "ÄãÏëÒªÍæÊ²Ã´Ä£Ê½£¿ÇëÊäÈë CVSC, CVSP, PVSC, PVSP, TVSC, »òÕß TVSP¡£P´ú±íÈË, C´ú±í»ú, T´ú±í·´Éí²ßÂÔ¡£\n";
+		if (version == CHI) std::cout << "ä½ æƒ³è¦çŽ©ä»€ä¹ˆæ¨¡å¼ï¼Ÿè¯·è¾“å…¥ CVSC, CVSP, PVSC, PVSP, TVSC, æˆ–è€… TVSPã€‚Pä»£è¡¨äºº, Cä»£è¡¨æœº, Tä»£è¡¨åèº«ç­–ç•¥ã€‚\n";
 		std::cin >> input;
 		while (input != "CVSC" && input != "CVSP" && input != "PVSC" && input != "PVSP" && input != "TVSC" && input != "TVSP")
 		{
 			std::cout << "Input error! Please input CVSC, CVSP, PVSC, PVSP, TVSC, or TVSP again below.\n";
-			if (version == CHI) std::cout << "ÊäÈë´íÎó£¡ÇëÔÙ´ÎÊäÈë CVSC, CVSP, PVSC, PVSP, TVSC, »òÕß TVSP¡£\n";
+			if (version == CHI) std::cout << "è¾“å…¥é”™è¯¯ï¼è¯·å†æ¬¡è¾“å…¥ CVSC, CVSP, PVSC, PVSP, TVSC, æˆ–è€… TVSPã€‚\n";
 			std::cin >> input;
 		}
 		if (input == "CVSC") playing_mode = CVSC;
@@ -555,10 +555,10 @@ public:
 	}
 	static inline void greet_player()
 	{
-		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "»¶Ó­À´ÍæÊý¶À¾®×ÖÆå£¡\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ÄãÓ¦¸ÃÒÑ¾­¶®µÃÔõÃ´ÍæÕâÍæÒâ¶ùÁË¡£\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "ÊäÈë×ø±êÊ±£¬ÏÈÊäÈëÊú×ÅµÄ£¬ÔÙÊäºá×ÅµÄ¡£\n"; std::cout << "\n"; Sleep(1000);
-		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "×ø±êÈçÏÂ£º\n"; std::cout << "\n";
+		std::cout << "Welcome to Sudoku - Tic Tac Toe!\n"; if (version == CHI) std::cout << "æ¬¢è¿Žæ¥çŽ©æ•°ç‹¬äº•å­—æ£‹ï¼\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "I think you have already understood the rules of this game.\n"; if (version == CHI) std::cout << "ä½ åº”è¯¥å·²ç»æ‡‚å¾—æ€Žä¹ˆçŽ©è¿™çŽ©æ„å„¿äº†ã€‚\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "When you enter the coordinates, please enter the vertical one first and then the horizontal one.\n"; if (version == CHI) std::cout << "è¾“å…¥åæ ‡æ—¶ï¼Œå…ˆè¾“å…¥ç«–ç€çš„ï¼Œå†è¾“æ¨ªç€çš„ã€‚\n"; std::cout << "\n"; Sleep(1000);
+		std::cout << "The coordinates is as follows:\n"; if (version == CHI) std::cout << "åæ ‡å¦‚ä¸‹ï¼š\n"; std::cout << "\n";
 		std::cout << "  ";
 		for (int i = 1; i <= MAXN; i++) std::cout << i % 10 << " ";
 		std::cout << std::endl;
@@ -584,17 +584,17 @@ public:
 		std::cout << std::endl;
 #ifdef USING_LARGER_BOARD
 		std::cout << "The coordinates appearing on the screen have been modded by 10. But when you type them, please type the original coordinates.\n";
-		if (version == CHI) std::cout << "ÏÔÊ¾µÄ×ø±ê¶¼±»×öÁËÄ£10ÔËËã£¬µ«µ±ÄãÊäÈë×ø±êÊ±£¬ÇëÊäÈëÔ­À´µÄ×ø±ê¡£\n";
+		if (version == CHI) std::cout << "æ˜¾ç¤ºçš„åæ ‡éƒ½è¢«åšäº†æ¨¡10è¿ç®—ï¼Œä½†å½“ä½ è¾“å…¥åæ ‡æ—¶ï¼Œè¯·è¾“å…¥åŽŸæ¥çš„åæ ‡ã€‚\n";
 		std::cout << std::endl;
 		Sleep(1000);
 #endif
 		get_playing_mode();
 		std::cout << std::endl;
-		if (playing_mode == CVSC) { std::cout << "You're playing in computer mode.\n"; if (version == CHI) std::cout << "ÏÖÔÚÊÇµçÄÔ¶ÔÕ½Ä£Ê½¡£\n"; }
-		else if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "µçÄÔÏÈ£¬Äãºó¡£\n"; }
-		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ÄãÏÈ£¬µçÄÔºó¡£\n"; }
-		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "ÏÖÔÚÊÇË«ÈËÄ£Ê½¡£\n"; }
-		std::cout << "\nLet's start!\n"; if (version == CHI) std::cout << "ÎÒÃÇ¿ªÊ¼°É£¡\n"; std::cout << "\n"; Sleep(1000);
+		if (playing_mode == CVSC) { std::cout << "You're playing in computer mode.\n"; if (version == CHI) std::cout << "çŽ°åœ¨æ˜¯ç”µè„‘å¯¹æˆ˜æ¨¡å¼ã€‚\n"; }
+		else if (playing_mode == CVSP) { std::cout << "Computer goes first and you go second.\n"; if (version == CHI) std::cout << "ç”µè„‘å…ˆï¼Œä½ åŽã€‚\n"; }
+		else if (playing_mode == PVSC) { std::cout << "You go first and computer goes second.\n"; if (version == CHI) std::cout << "ä½ å…ˆï¼Œç”µè„‘åŽã€‚\n"; }
+		else if (playing_mode == PVSP) { std::cout << "You're playing in two-player mode.\n"; if (version == CHI) std::cout << "çŽ°åœ¨æ˜¯åŒäººæ¨¡å¼ã€‚\n"; }
+		std::cout << "\nLet's start!\n"; if (version == CHI) std::cout << "æˆ‘ä»¬å¼€å§‹å§ï¼\n"; std::cout << "\n"; Sleep(1000);
 	}
 	class Moves
 	{
@@ -602,14 +602,14 @@ public:
 		static inline int human_move(int now_grid)
 		{
 			int x, y;
-			std::cout << "Your Move:\n\nEnter coordinates:\n"; if (version == CHI) std::cout << "ÊäÈë×ø±ê£º\n";
+			std::cout << "Your Move:\n\nEnter coordinates:\n"; if (version == CHI) std::cout << "è¾“å…¥åæ ‡ï¼š\n";
 			std::cin >> x >> y;
 			if (x == -1 && y == -1) return tiger_move(now_grid);
 			coord c(x - 1, y - 1); point p = c.to_point();
 			while (p.grid != now_grid || p.get_status() != BLANK)
 			{
 				if (std::cin.fail()) std::cin.clear(), std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-				std::cout << "\nInvalid input! Try again:\n"; if (version == CHI) std::cout << "ÊäÈë´íÎó£¡ÇëÖØÐÂÊäÈë£º\n";
+				std::cout << "\nInvalid input! Try again:\n"; if (version == CHI) std::cout << "è¾“å…¥é”™è¯¯ï¼è¯·é‡æ–°è¾“å…¥ï¼š\n";
 				std::cin >> x >> y;
 				c.x = x - 1, c.y = y - 1;
 				p = c.to_point();
