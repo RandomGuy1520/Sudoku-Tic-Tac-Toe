@@ -129,7 +129,7 @@ public:
 			double tot = 0, cnt = 0;
 			for (int i = 0; i < MAXN; i++) tot += blank[i], cnt += blank[i] * blank[i];
 			if (tot <= 1 || cnt == tot) return 1;
-			return std::min((int)tot, (int)round((log(10) * 13 + log(MAXSEC)) / log(cnt / tot) - 3.5));
+			return std::min((int)tot + 1, (int)round((log(10) * 13 + log(MAXSEC)) / log(cnt / tot) - 3.5));
 		}
 		else return MAXDEPTH;
 	}
